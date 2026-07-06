@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureBank — Admin Login</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0e1a;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-container{background:#141b2b;border:1px solid #1e293b;border-radius:16px;padding:40px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo .icon{font-size:48px;display:block;margin-bottom:8px}
+.login-logo h1{color:#fff;font-size:24px;font-weight:700}
+.login-logo p{color:#64748b;font-size:14px;margin-top:4px}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;color:#94a3b8;font-size:13px;font-weight:500;margin-bottom:6px}
+.form-group input{width:100%;padding:12px 16px;background:#0a0e1a;border:1px solid #1e293b;border-radius:8px;color:#e2e8f0;font-size:14px;transition:border-color 0.2s}
+.form-group input:focus{outline:none;border-color:#1A6BFF;box-shadow:0 0 0 3px rgba(26,107,255,0.1)}
+.btn-login{width:100%;padding:12px;background:#1A6BFF;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn-login:hover{background:#1156AE}
+.flash{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px}
+.flash.error{background:#1a0a0a;color:#ef4444;border:1px solid #7f1d1d}
+.back-link{display:block;text-align:center;margin-top:16px;color:#64748b;font-size:13px;text-decoration:none}
+.back-link:hover{color:#94a3b8}
+</style>
+</head>
+<body>
+<div class="login-container">
+    <div class="login-logo">
+        <span class="icon">🛡️</span>
+        <h1>Admin Access</h1>
+        <p>Security Operations Center</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+            <div class="flash {{ cat }}">{{ msg }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="/admin">
+        <div class="form-group">
+            <label for="password">Admin Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter admin password" required autofocus>
+        </div>
+        <button type="submit" class="btn-login">🔐 Access Admin Panel</button>
+        <a href="/home" class="back-link">← Back to Home</a>
+    </form>
+</div>
+</body>
+</html>

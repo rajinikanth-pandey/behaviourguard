@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureBank — Register</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F4F6FB;min-height:100vh;display:flex;flex-direction:column}
+.header{background:#0D2137;height:56px;display:flex;align-items:center;padding:0 28px;gap:10px;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:10px}
+.logo{width:30px;height:30px;background:#1A6BFF;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff}
+.logo-text{color:#fff;font-size:18px;font-weight:700}
+.header-right{display:flex;align-items:center;gap:14px}
+.back-link{color:rgba(255,255,255,.65);font-size:13px;text-decoration:none;padding:5px 14px;border:1px solid rgba(255,255,255,.2);border-radius:6px;transition:background 0.2s}
+.back-link:hover{background:rgba(255,255,255,.1)}
+
+.main{flex:1;padding:28px 24px;max-width:520px;margin:0 auto;width:100%}
+
+.page-title{font-size:24px;font-weight:700;color:#0D2137;margin-bottom:6px}
+.page-sub{font-size:14px;color:#5A6A7E;margin-bottom:24px}
+
+.register-card{background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #E8EDF5}
+
+.form-group{margin-bottom:16px}
+.form-group:last-of-type{margin-bottom:20px}
+
+.form-label{display:block;font-size:13px;font-weight:500;color:#0D2137;margin-bottom:5px}
+.form-label .required{color:#C0392B;margin-left:2px}
+.form-hint{font-size:11px;color:#94A3B8;margin-top:3px}
+
+.form-control{width:100%;padding:10px 14px;font-size:14px;border:1px solid #D4DBE8;border-radius:8px;transition:border-color 0.2s;background:#fff;color:#0D2137}
+.form-control:focus{outline:none;border-color:#1A6BFF;box-shadow:0 0 0 3px rgba(26,107,255,.1)}
+.form-control::placeholder{color:#94A3B8}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+.pin-input{width:100%;padding:10px 14px;font-size:14px;border:1px solid #D4DBE8;border-radius:8px;transition:border-color 0.2s;background:#fff;color:#0D2137;letter-spacing:4px;font-family:monospace;font-size:18px;text-align:center}
+.pin-input:focus{outline:none;border-color:#1A6BFF;box-shadow:0 0 0 3px rgba(26,107,255,.1)}
+.pin-input::placeholder{letter-spacing:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#94A3B8}
+
+.pin-container{position:relative}
+.pin-container .pin-dots{position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;gap:4px}
+.pin-container .pin-dots span{width:8px;height:8px;border-radius:50%;background:#D4DBE8;display:inline-block}
+.pin-container .pin-dots span.filled{background:#1A6BFF}
+
+.btn-register{width:100%;padding:12px;font-size:16px;font-weight:600;color:#fff;background:#1A6BFF;border:none;border-radius:8px;cursor:pointer;transition:background 0.2s,transform 0.1s}
+.btn-register:hover{background:#1156AE}
+.btn-register:active{transform:scale(0.98)}
+.btn-register:disabled{opacity:0.5;cursor:not-allowed}
+
+.btn-login-link{display:block;text-align:center;margin-top:16px;color:#1A6BFF;font-size:14px;text-decoration:none}
+.btn-login-link:hover{text-decoration:underline}
+
+.flash{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px}
+.flash.success{background:#ECFDF5;color:#007A52;border:1px solid #A7F3D0}
+.flash.error{background:#FEF3F2;color:#C0392B;border:1px solid #FECACA}
+
+footer{background:#0D2137;color:rgba(255,255,255,.4);font-size:11px;padding:12px 28px;text-align:center;margin-top:auto}
+
+@media(max-width:480px){.form-row{grid-template-columns:1fr}.main{padding:16px}.register-card{padding:20px}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo">🛡</div>
+    <span class="logo-text">SecureBank</span>
+  </div>
+  <div class="header-right">
+    <a href="/" class="back-link">← Back to Login</a>
+  </div>
+</header>
+
+<div class="main">
+  <div class="page-title">Create Account</div>
+  <div class="page-sub">Join SecureBank and start banking securely</div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="register-card">
+    <form method="POST" action="/register" id="registerForm">
+      <!-- Full Name -->
+      <div class="form-group">
+        <label class="form-label" for="full_name">
+          Full Name <span class="required">*</span>
+        </label>
+        <input type="text" 
+               id="full_name" 
+               name="full_name" 
+               class="form-control" 
+               placeholder="Enter your full name"
+               required>
+      </div>
+
+      <!-- Username -->
+      <div class="form-group">
+        <label class="form-label" for="username">
+          Username <span class="required">*</span>
+        </label>
+        <input type="text" 
+               id="username" 
+               name="username" 
+               class="form-control" 
+               placeholder="Choose a username"
+               required>
+        <div class="form-hint">Username must be unique and at least 3 characters</div>
+      </div>
+
+      <!-- Email & Phone -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="email">
+            Email Address <span class="required">*</span>
+          </label>
+          <input type="email" 
+                 id="email" 
+                 name="email" 
+                 class="form-control" 
+                 placeholder="your@email.com"
+                 required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="phone">
+            Phone Number <span class="required">*</span>
+          </label>
+          <input type="tel" 
+                 id="phone" 
+                 name="phone" 
+                 class="form-control" 
+                 placeholder="9876543210"
+                 pattern="[0-9]{10}"
+                 required>
+          <div class="form-hint">10-digit mobile number</div>
+        </div>
+      </div>
+
+      <!-- Account Type -->
+      <div class="form-group">
+        <label class="form-label" for="account_type">
+          Account Type <span class="required">*</span>
+        </label>
+        <select id="account_type" name="account_type" class="form-control" required>
+          <option value="Savings">Savings Account</option>
+          <option value="Current">Current Account</option>
+          <option value="Salary">Salary Account</option>
+        </select>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label class="form-label" for="password">
+          Password <span class="required">*</span>
+        </label>
+        <input type="password" 
+               id="password" 
+               name="password" 
+               class="form-control" 
+               placeholder="Create a strong password"
+               minlength="6"
+               required>
+        <div class="form-hint">Minimum 6 characters</div>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group">
+        <label class="form-label" for="confirm_password">
+          Confirm Password <span class="required">*</span>
+        </label>
+        <input type="password" 
+               id="confirm_password" 
+               name="confirm_password" 
+               class="form-control" 
+               placeholder="Re-enter your password"
+               required>
+      </div>
+
+      <!-- Transaction PIN -->
+      <div class="form-group">
+        <label class="form-label" for="transaction_pin">
+          Transaction PIN <span class="required">*</span>
+        </label>
+        <div class="pin-container">
+          <input type="password" 
+                 id="transaction_pin" 
+                 name="transaction_pin" 
+                 class="pin-input" 
+                 placeholder="●●●●"
+                 maxlength="4"
+                 pattern="[0-9]{4}"
+                 required>
+          <div class="pin-dots">
+            <span id="dot1"></span>
+            <span id="dot2"></span>
+            <span id="dot3"></span>
+            <span id="dot4"></span>
+          </div>
+        </div>
+        <div class="form-hint">4-digit PIN for transaction verification</div>
+      </div>
+
+      <!-- Register Button -->
+      <button type="submit" class="btn-register" id="registerBtn">
+        Create Account →
+      </button>
+
+      <a href="/" class="btn-login-link">Already have an account? Login</a>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <span>🛡️ BehaviorGuard AI Protected Banking</span>
+  <span style="margin:0 12px;">·</span>
+  <span>Secure Registration</span>
+  <span style="margin:0 12px;">·</span>
+  <span>© 2026</span>
+</footer>
+
+<script>
+  // PIN input visualization with dots
+  const pinInput = document.getElementById('transaction_pin');
+  const dots = [
+    document.getElementById('dot1'),
+    document.getElementById('dot2'),
+    document.getElementById('dot3'),
+    document.getElementById('dot4')
+  ];
+
+  pinInput.addEventListener('input', function() {
+    const length = this.value.length;
+    dots.forEach((dot, index) => {
+      if (index < length) {
+        dot.classList.add('filled');
+      } else {
+        dot.classList.remove('filled');
+      }
+    });
+  });
+
+  // Form validation
+  const form = document.getElementById('registerForm');
+  const password = document.getElementById('password');
+  const confirmPassword = document.getElementById('confirm_password');
+  const username = document.getElementById('username');
+  const fullName = document.getElementById('full_name');
+  const email = document.getElementById('email');
+  const phone = document.getElementById('phone');
+
+  form.addEventListener('submit', function(e) {
+    // Check username length
+    if (username.value.length < 3) {
+      e.preventDefault();
+      alert('Username must be at least 3 characters.');
+      username.focus();
+      return false;
+    }
+
+    // Check full name
+    if (fullName.value.length < 2) {
+      e.preventDefault();
+      alert('Please enter your full name.');
+      fullName.focus();
+      return false;
+    }
+
+    // Check email
+    if (!email.value.includes('@')) {
+      e.preventDefault();
+      alert('Please enter a valid email address.');
+      email.focus();
+      return false;
+    }
+
+    // Check phone
+    if (phone.value.length !== 10 || !/^\d{10}$/.test(phone.value)) {
+      e.preventDefault();
+      alert('Please enter a valid 10-digit phone number.');
+      phone.focus();
+      return false;
+    }
+
+    // Check password match
+    if (password.value !== confirmPassword.value) {
+      e.preventDefault();
+      alert('Passwords do not match. Please re-enter.');
+      confirmPassword.focus();
+      return false;
+    }
+
+    // Check password length
+    if (password.value.length < 6) {
+      e.preventDefault();
+      alert('Password must be at least 6 characters.');
+      password.focus();
+      return false;
+    }
+
+    // Check PIN length
+    const pin = document.getElementById('transaction_pin').value;
+    if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+      e.preventDefault();
+      alert('Please enter a valid 4-digit transaction PIN.');
+      document.getElementById('transaction_pin').focus();
+      return false;
+    }
+
+    return true;
+  });
+
+  // Restrict phone to digits only
+  phone.addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '');
+  });
+
+  // Restrict PIN to digits only
+  pinInput.addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '');
+  });
+</script>
+
+</body>
+</html>

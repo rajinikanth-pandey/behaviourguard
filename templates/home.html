@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SecureBank — Home</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F4F6FB;min-height:100vh;display:flex;flex-direction:column}
+.header{background:#0D2137;height:56px;display:flex;align-items:center;padding:0 28px;gap:10px;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:10px}
+.logo{width:30px;height:30px;background:#1A6BFF;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff}
+.logo-text{color:#fff;font-size:18px;font-weight:700}
+.header-right{display:flex;align-items:center;gap:14px}
+.user-pill{color:rgba(255,255,255,.7);font-size:13px}
+.logout{color:rgba(255,255,255,.65);font-size:13px;text-decoration:none;padding:5px 14px;border:1px solid rgba(255,255,255,.2);border-radius:6px;transition:background 0.2s}
+.logout:hover{background:rgba(255,255,255,.1)}
+
+.main{flex:1;padding:28px 24px;max-width:960px;margin:0 auto;width:100%}
+
+.greeting{font-size:28px;font-weight:700;color:#0D2137;margin-bottom:4px}
+.greeting-sub{font-size:14px;color:#5A6A7E;margin-bottom:24px}
+.greeting-name{font-size:32px;font-weight:700;color:#0D2137;margin-bottom:8px}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+
+.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #E8EDF5}
+.card-label{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#5A6A7E;margin-bottom:10px}
+
+.account-overview{background:linear-gradient(135deg,#0D2137 0%,#1a365d 100%);border:none;color:#fff}
+.account-overview .card-label{color:rgba(255,255,255,.5)}
+.account-overview .greeting-name{font-size:18px;font-weight:600;margin-bottom:16px}
+.account-balance{font-size:32px;font-weight:700;margin-bottom:4px}
+.account-balance-sub{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:16px}
+.account-details{display:flex;gap:24px;flex-wrap:wrap;padding-top:16px;border-top:1px solid rgba(255,255,255,.1)}
+.account-detail-item{display:flex;flex-direction:column;gap:2px}
+.account-detail-item .label{font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.04em}
+.account-detail-item .value{font-size:14px;font-weight:500;color:#fff}
+
+.customer-info .info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F4F6FB}
+.customer-info .info-row:last-child{border-bottom:none}
+.customer-info .info-label{font-size:13px;color:#5A6A7E}
+.customer-info .info-value{font-size:13px;font-weight:500;color:#0D2137}
+
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quick-action-btn{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#F8FAFC;border:1px solid #E8EDF5;border-radius:10px;text-decoration:none;color:#0D2137;font-weight:500;font-size:13px;transition:all 0.2s}
+.quick-action-btn:hover{background:#EFF6FF;border-color:#BFDBFE;transform:translateY(-1px);box-shadow:0 2px 8px rgba(26,107,255,.1)}
+.quick-action-btn .icon{font-size:20px}
+.quick-action-btn .badge{font-size:10px;background:#1A6BFF;color:#fff;padding:1px 8px;border-radius:10px;margin-left:auto}
+
+.factor-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px}
+.factor-item .name{min-width:100px;color:#5A6A7E}
+.factor-item .bar{flex:1;height:4px;background:#E8EDF5;border-radius:2px;overflow:hidden}
+.factor-item .bar .fill{height:100%;border-radius:2px}
+.factor-item .val{min-width:30px;text-align:right;font-family:monospace;font-size:11px;color:#0D2137}
+
+.gauge-small{height:6px;background:#E8EDF5;border-radius:3px;overflow:hidden;margin-top:6px}
+.gauge-small .fill{height:100%;border-radius:3px;transition:width .8s ease}
+
+.history-table{width:100%;border-collapse:collapse;font-size:13px}
+.history-table th{font-size:11px;font-weight:600;color:#5A6A7E;text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;text-align:left;border-bottom:1px solid #E8EDF5}
+.history-table td{padding:8px 10px;border-bottom:1px solid #F4F6FB;color:#1A2233}
+.history-table tr:last-child td{border-bottom:none}
+.badge{font-size:11px;padding:2px 10px;border-radius:10px;font-weight:500}
+.badge.allow{background:#ECFDF5;color:#007A52}
+.badge.otp{background:#FFF7ED;color:#B45309}
+.badge.block{background:#FEF3F2;color:#C0392B}
+
+.full-width{grid-column:1/-1}
+
+.flash{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px}
+.flash.success{background:#ECFDF5;color:#007A52;border:1px solid #A7F3D0}
+.flash.warning{background:#FFF7ED;color:#B45309;border:1px solid #FDE68A}
+.flash.error{background:#FEF3F2;color:#C0392B;border:1px solid #FECACA}
+.flash.info{background:#EFF6FF;color:#1156AE;border:1px solid #BFDBFE}
+
+.btn-success{display:inline-block;font-size:14px;font-weight:600;color:#fff;background:#007A52;padding:10px 28px;border-radius:8px;text-decoration:none;border:none;transition:background 0.2s ease,transform 0.1s ease;box-shadow:0 2px 6px rgba(0,122,82,0.3);white-space:nowrap}
+.btn-success:hover{background:#005f3f;box-shadow:0 4px 12px rgba(0,122,82,0.4);transform:translateY(-1px)}
+
+.btn-primary{display:inline-block;font-size:14px;font-weight:600;color:#fff;background:#1A6BFF;padding:10px 28px;border-radius:8px;text-decoration:none;border:none;transition:background 0.2s ease,transform 0.1s ease;box-shadow:0 2px 6px rgba(26,107,255,0.3);white-space:nowrap}
+.btn-primary:hover{background:#1156AE;box-shadow:0 4px 12px rgba(26,107,255,0.4);transform:translateY(-1px)}
+
+.transfer-section{background:linear-gradient(135deg,#f8faff 0%,#eff4ff 100%);border:2px solid #BFDBFE;border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.transfer-section .transfer-info{display:flex;flex-direction:column;gap:2px}
+.transfer-section .transfer-title{font-size:16px;font-weight:600;color:#0D2137}
+.transfer-section .transfer-sub{font-size:13px;color:#5A6A7E}
+
+/* NEW: Method Info Box */
+.method-info{background:#F0F7FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.method-info .method-item{display:flex;align-items:center;gap:10px;font-size:13px}
+.method-info .method-item .icon{font-size:20px}
+.method-info .method-item .text{color:#0D2137}
+.method-info .method-item .text .highlight{font-weight:600;color:#1A6BFF}
+
+.nav{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.nav a{font-size:13px;color:#1156AE;text-decoration:none;padding:6px 14px;border:1px solid #BFDBFE;border-radius:8px;font-weight:500}
+.nav a:hover{background:#EFF6FF}
+
+footer{background:#0D2137;color:rgba(255,255,255,.4);font-size:11px;padding:12px 28px;text-align:center;margin-top:auto}
+footer a{color:rgba(255,255,255,.5);text-decoration:none}
+
+@media(max-width:640px){.grid{grid-template-columns:1fr}.quick-actions{grid-template-columns:1fr}.method-info{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo">🛡</div>
+    <span class="logo-text">SecureBank</span>
+  </div>
+  <div class="header-right">
+    <span class="user-pill">{{ user.full_name or user.username }}</span>
+    <a href="/logout" class="logout">Log Out</a>
+  </div>
+</header>
+
+<div class="main">
+  <div class="greeting">Welcome,</div>
+  <div class="greeting-name">{{ user.full_name or user.username }}</div>
+  <div class="greeting-sub">Here's your banking overview</div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <!-- Transfer Section -->
+  <div class="transfer-section" style="border-color: #A7F3D0; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+    <div class="transfer-info">
+      <span class="transfer-title">💳 Make a Transfer</span>
+      <span class="transfer-sub">
+        Choose your verification method during transfer
+        <span style="display:block;font-size:11px;color:#5A6A7E;margin-top:2px;">
+          🕵️ Silent Duress or 🔑 PIN Method
+        </span>
+      </span>
+    </div>
+    <a href="/transfer" class="btn-success">
+      <span style="display:flex;align-items:center;gap:8px;">
+        <span>Transfer Money</span>
+        <span style="font-size:18px;">→</span>
+      </span>
+    </a>
+  </div>
+
+  <!-- NEW: Method Info -->
+  <div class="method-info">
+    <div class="method-item">
+      <span class="icon">🕵️</span>
+      <div class="text">
+        <span class="highlight">Silent Duress</span>
+        <span style="display:block;font-size:12px;color:#5A6A7E;">ANY gesture blocks transaction</span>
+      </div>
+    </div>
+    <div class="method-item">
+      <span class="icon">🔑</span>
+      <div class="text">
+        <span class="highlight">PIN Method</span>
+        <span style="display:block;font-size:12px;color:#5A6A7E;">Normal processing with PIN</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <a href="/dashboard">📊 Session Dashboard</a>
+    <a href="/admin">🛡️ Admin Panel</a>
+    <a href="/logout">🚪 Log Out</a>
+  </div>
+
+  <div class="grid">
+    <!-- Account Overview Card -->
+    <div class="card account-overview">
+      <div class="card-label">Account Overview</div>
+      <div class="greeting-name">Hello, {{ user.full_name or user.username }}</div>
+      <div class="account-balance">₹ {{ "%.2f"|format(user.balance or 0) }}</div>
+      <div class="account-balance-sub">Available Balance</div>
+      <div class="account-details">
+        <div class="account-detail-item">
+          <span class="label">Account Number</span>
+          <span class="value">XXXX XXXX XXXX {{ (user.account_number or '1234')[-4:] }}</span>
+        </div>
+        <div class="account-detail-item">
+          <span class="label">Account Type</span>
+          <span class="value">{{ user.account_type or 'Savings' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Information Card -->
+    <div class="card customer-info">
+      <div class="card-label">Customer Information</div>
+      <div class="info-row">
+        <span class="info-label">📧 Email</span>
+        <span class="info-value">{{ user.email or 'Not set' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">📱 Phone</span>
+        <span class="info-value">{{ user.phone or 'Not set' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">🔐 Verification</span>
+        <span class="info-value">
+          <span style="color:#007A52;">✅ User Choice</span>
+          <span style="font-size:11px;color:#5A6A7E;margin-left:4px;">(Silent Duress / PIN)</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-label">Quick Actions</div>
+    <div class="quick-actions">
+      <a href="/transfer" class="quick-action-btn">
+        <span class="icon">💸</span> Transfer Money
+        <span class="badge">Secure</span>
+      </a>
+      <a href="#" class="quick-action-btn">
+        <span class="icon">📜</span> Transactions
+        <span class="badge">History</span>
+      </a>
+      <a href="/admin" class="quick-action-btn">
+        <span class="icon">🛡️</span> Admin Panel
+        <span class="badge">Security</span>
+      </a>
+      <a href="/dashboard" class="quick-action-btn">
+        <span class="icon">📊</span> AI Dashboard
+        <span class="badge">Analytics</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- AI Security Section -->
+    <div class="card">
+      <div class="card-label">🤖 AI Security</div>
+      
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:13px;color:#5A6A7E;">Risk Score</span>
+          <span style="font-size:20px;font-weight:700;color:{{ color }}">
+            {% if risk_score < 0 %}—{% else %}{{ risk_score }}{% endif %}
+          </span>
+        </div>
+        <div class="gauge-small">
+          <div class="fill" style="width:{{ risk_score if risk_score >= 0 else 0 }}%;background:{{ color }}"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#94A3B8;margin-top:2px;">
+          <span>Safe</span>
+          <span>Risk</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <span class="badge 
+          {% if risk_score < 0 %}allow
+          {% elif risk_score <= allow_max %}allow
+          {% elif risk_score <= otp_max %}otp
+          {% else %}block{% endif %}"
+          style="font-size:13px;padding:4px 16px;">
+          {{ label }}
+        </span>
+        {% if latency_ms > 0 %}
+          <span style="font-size:11px;color:#94A3B8;margin-left:8px;">{{ latency_ms|round(1) }} ms</span>
+        {% endif %}
+      </div>
+
+      {% if factors %}
+        <div style="border-top:1px solid #E8EDF5;padding-top:10px;">
+          <div style="font-size:11px;color:#5A6A7E;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Risk Factors</div>
+          {% if factors.isolation_forest_risk is defined %}
+            <div class="factor-item">
+              <span class="name">Isolation Forest</span>
+              <div class="bar"><div class="fill" style="width:{{ factors.isolation_forest_risk }}%;background:#1A6BFF"></div></div>
+              <span class="val">{{ factors.isolation_forest_risk|round(1) }}</span>
+            </div>
+          {% endif %}
+          {% if factors.autoencoder_risk is defined %}
+            <div class="factor-item">
+              <span class="name">Autoencoder</span>
+              <div class="bar"><div class="fill" style="width:{{ factors.autoencoder_risk }}%;background:#7B5EF5"></div></div>
+              <span class="val">{{ factors.autoencoder_risk|round(1) }}</span>
+            </div>
+          {% endif %}
+          {% if factors.event_count is defined %}
+            <div style="font-size:11px;color:#94A3B8;margin-top:6px;">Events analyzed: {{ factors.event_count }}</div>
+          {% endif %}
+          {% if factors.note is defined %}
+            <div style="font-size:11px;color:#B45309;margin-top:4px;">{{ factors.note }}</div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div style="font-size:12px;color:#94A3B8;">No factor data available</div>
+      {% endif %}
+    </div>
+
+    <!-- Recent Login Activity -->
+    <div class="card">
+      <div class="card-label">Recent Login Activity</div>
+      {% if history %}
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Risk</th>
+              <th>Decision</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for h in history[:5] %}
+            <tr>
+              <td style="font-size:12px;">{{ h.timestamp.strftime('%b %d, %H:%M') if h.timestamp else '—' }}</td>
+              <td>
+                {% if h.risk_score < 0 %}—
+                {% else %}<strong>{{ h.risk_score|round|int }}</strong>
+                {% endif %}
+              </td>
+              <td><span class="badge {{ h.decision }}">{{ h.decision }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% if history|length > 5 %}
+          <div style="text-align:center;margin-top:8px;">
+            <a href="/dashboard" style="font-size:12px;color:#1A6BFF;text-decoration:none;">View all →</a>
+          </div>
+        {% endif %}
+      {% else %}
+        <div style="color:#94A3B8;font-size:13px;">No login history yet</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent Transactions -->
+  <div class="card full-width" style="margin-top:16px;">
+    <div class="card-label">Recent Transactions</div>
+    {% if transactions %}
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Recipient</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in transactions %}
+          <tr>
+            <td>{{ t.recipient_name }}</td>
+            <td style="font-weight:600;color:#0D2137;">₹ {{ "%.2f"|format(t.amount) }}</td>
+            <td><span class="badge allow">✅ SUCCESS</span></td>
+            <td style="font-size:12px;color:#94A3B8;">{{ t.timestamp.strftime('%b %d, %H:%M') if t.timestamp else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div style="color:#94A3B8;font-size:13px;padding:10px 0;">No transactions yet</div>
+    {% endif %}
+  </div>
+</div>
+
+<footer>
+  <span>🛡️ BehaviorGuard AI Protected Banking</span>
+  <span style="margin:0 12px;">·</span>
+  <span>Session Protected</span>
+  <span style="margin:0 12px;">·</span>
+  <span>© 2026</span>
+</footer>
+
+</body>
+</html>

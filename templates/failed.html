@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureBank — Transaction Failed</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F4F6FB;min-height:100vh;display:flex;flex-direction:column}
+.header{background:#0D2137;height:56px;display:flex;align-items:center;padding:0 28px;gap:10px;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:10px}
+.logo{width:30px;height:30px;background:#1A6BFF;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff}
+.logo-text{color:#fff;font-size:18px;font-weight:700}
+.header-right{display:flex;align-items:center;gap:14px}
+.user-pill{color:rgba(255,255,255,.7);font-size:13px}
+.back-link{color:rgba(255,255,255,.65);font-size:13px;text-decoration:none;padding:5px 14px;border:1px solid rgba(255,255,255,.2);border-radius:6px;transition:background 0.2s}
+.back-link:hover{background:rgba(255,255,255,.1)}
+
+.main{flex:1;padding:28px 24px;max-width:560px;margin:0 auto;width:100%;display:flex;flex-direction:column;justify-content:center;min-height:calc(100vh - 120px)}
+
+.failed-card{background:#fff;border-radius:16px;padding:40px 32px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.06);border:1px solid #FECACA}
+
+.failed-icon{width:80px;height:80px;background:#FEF3F2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:40px;color:#C0392B}
+
+.failed-title{font-size:24px;font-weight:700;color:#C0392B;margin-bottom:6px}
+.failed-sub{font-size:14px;color:#5A6A7E;margin-bottom:8px}
+
+.divider{height:1px;background:#FECACA;margin:16px 0}
+
+.tx-detail{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F4F6FB}
+.tx-detail:last-child{border-bottom:none}
+.tx-detail .label{font-size:13px;color:#5A6A7E}
+.tx-detail .value{font-size:14px;font-weight:600;color:#0D2137}
+.tx-detail .value.amount{color:#C0392B;font-size:18px}
+
+.failed-notice{background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:12px 16px;margin:12px 0;text-align:left}
+.failed-notice .icon{font-size:16px}
+.failed-notice .text{font-size:13px;color:#78350F;line-height:1.6}
+
+.btn-home{display:inline-block;margin-top:20px;padding:12px 40px;background:#0D2137;color:#fff;text-decoration:none;border-radius:10px;font-weight:600;font-size:14px;transition:background 0.2s}
+.btn-home:hover{background:#1a365d}
+
+.btn-retry{display:inline-block;margin-top:12px;padding:10px 24px;background:#fff;color:#5A6A7E;text-decoration:none;border-radius:8px;font-weight:500;font-size:13px;border:1px solid #D4DBE8;transition:background 0.2s;cursor:pointer;margin-left:8px}
+.btn-retry:hover{background:#F4F6FB}
+
+.actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+
+.ref-number{font-size:12px;color:#94A3B8;margin-top:12px;font-family:monospace}
+
+footer{background:#0D2137;color:rgba(255,255,255,.4);font-size:11px;padding:12px 28px;text-align:center;margin-top:auto}
+footer a{color:rgba(255,255,255,.5);text-decoration:none}
+
+@media(max-width:480px){.main{padding:16px}.failed-card{padding:24px 16px}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo">🛡</div>
+    <span class="logo-text">SecureBank</span>
+  </div>
+  <div class="header-right">
+    <span class="user-pill">{{ user.full_name or user.username }}</span>
+    <a href="/home" class="back-link">← Back</a>
+  </div>
+</header>
+
+<div class="main">
+  <div class="failed-card">
+    <div class="failed-icon">✕</div>
+    
+    <h1 class="failed-title">Transaction Failed</h1>
+    <p class="failed-sub">We couldn't process your transaction at this time</p>
+
+    <div class="divider"></div>
+
+    <div class="failed-notice">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <span class="icon">🛡️</span>
+        <div>
+          <div style="font-weight:600;color:#78350F;margin-bottom:4px;">Security Check</div>
+          <div class="text">
+            Your transaction could not be completed due to security verification.
+            No money has been deducted from your account.
+          </div>
+          <div style="margin-top:8px;font-size:12px;color:#78350F;background:#fef3c7;padding:6px 12px;border-radius:6px;display:inline-block;">
+            ✅ Your account is safe and secure
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tx-detail">
+      <span class="label">Recipient</span>
+      <span class="value">{{ transaction.recipient }}</span>
+    </div>
+    <div class="tx-detail">
+      <span class="label">Account Number</span>
+      <span class="value">XXXX XXXX {{ transaction.account[-4:] }}</span>
+    </div>
+    <div class="tx-detail">
+      <span class="label">IFSC Code</span>
+      <span class="value">{{ transaction.ifsc }}</span>
+    </div>
+    <div class="tx-detail">
+      <span class="label">Purpose</span>
+      <span class="value">{{ transaction.purpose|replace('_', ' ')|title }}</span>
+    </div>
+    <div class="tx-detail" style="border-bottom:none;padding-bottom:0;">
+      <span class="label">Amount</span>
+      <span class="value amount">₹ {{ "%.2f"|format(transaction.amount) }}</span>
+    </div>
+
+    <p style="font-size:13px;color:#5A6A7E;margin:8px 0;">
+      Your available balance remains unchanged.
+    </p>
+
+    <div class="ref-number">
+      Ref: FLD-{{ datetime.now().strftime('%Y%m%d%H%M') if datetime else '2026' }}
+    </div>
+
+    <div class="actions">
+      <a href="/home" class="btn-home">🏠 Back to Home</a>
+      <a href="/transfer" class="btn-retry">🔄 Retry Transfer</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>🛡️ BehaviorGuard AI Protected Banking</span>
+  <span style="margin:0 12px;">·</span>
+  <span>Transaction Failed</span>
+  <span style="margin:0 12px;">·</span>
+  <span>© 2026</span>
+</footer>
+
+</body>
+</html>

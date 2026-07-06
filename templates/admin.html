@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureBank — Security Operations Center</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0e1a;min-height:100vh;display:flex;flex-direction:column;color:#e2e8f0}
+
+.header{background:linear-gradient(135deg,#0D2137 0%,#1a1f2e 100%);border-bottom:1px solid #2a3346;height:64px;display:flex;align-items:center;padding:0 32px;gap:12px;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:12px}
+.logo{width:36px;height:36px;background:#1A6BFF;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
+.logo-text{color:#fff;font-size:20px;font-weight:700;letter-spacing:0.5px}
+.logo-text span{color:#1A6BFF}
+.header-right{display:flex;align-items:center;gap:16px}
+.status-badge{display:flex;align-items:center;gap:6px;font-size:12px;color:#94a3b8;background:#1a2236;padding:6px 14px;border-radius:20px;border:1px solid #2a3346}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;animation:pulse 2s infinite}
+.status-dot.alert{background:#ef4444;animation:pulse 0.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.user-info{font-size:13px;color:#94a3b8}
+.logout-link{color:#64748b;font-size:13px;text-decoration:none;padding:6px 16px;border:1px solid #2a3346;border-radius:6px;transition:all 0.2s}
+.logout-link:hover{background:#1a2236;color:#e2e8f0}
+
+.main{flex:1;padding:24px 32px;max-width:1400px;margin:0 auto;width:100%}
+
+.page-title{font-size:24px;font-weight:700;color:#fff;margin-bottom:4px}
+.page-sub{font-size:14px;color:#94a3b8;margin-bottom:24px}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:#141b2b;border:1px solid #1e293b;border-radius:12px;padding:16px 20px}
+.stat-card .label{font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;margin-bottom:4px}
+.stat-card .value{font-size:28px;font-weight:700;color:#fff}
+.stat-card .value.blue{color:#1A6BFF}
+.stat-card .value.green{color:#22c55e}
+.stat-card .value.yellow{color:#eab308}
+.stat-card .value.red{color:#ef4444}
+.stat-card .sub{font-size:11px;color:#64748b;margin-top:4px}
+
+.main-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.card{background:#141b2b;border:1px solid #1e293b;border-radius:12px;overflow:hidden}
+.card-header{padding:16px 20px;border-bottom:1px solid #1e293b;display:flex;justify-content:space-between;align-items:center}
+.card-header .title{font-size:14px;font-weight:600;color:#fff}
+.card-header .badge{font-size:11px;background:#1a2236;color:#94a3b8;padding:2px 12px;border-radius:12px;border:1px solid #2a3346}
+.card-header .alert-count{font-size:12px;color:#ef4444;font-weight:600;background:#450a0a;padding:2px 12px;border-radius:12px;border:1px solid #7f1d1d}
+
+.alert-list{padding:0;max-height:500px;overflow-y:auto}
+.alert-item{padding:16px 20px;border-bottom:1px solid #1a2236;display:flex;flex-direction:column;gap:12px;transition:background 0.2s}
+.alert-item:last-child{border-bottom:none}
+.alert-item:hover{background:#1a2236}
+.alert-item.resolved{opacity:0.6;background:#0a1a0a}
+.alert-item.resolved:hover{background:#0f2a0f}
+
+.alert-top{display:flex;align-items:flex-start;gap:14px}
+.alert-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.alert-icon.critical{background:#450a0a;color:#ef4444;animation:alertPulse 1s infinite}
+@keyframes alertPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
+.alert-content{flex:1;min-width:0}
+.alert-content .alert-title{font-size:15px;font-weight:600;color:#fff}
+.alert-content .alert-desc{font-size:13px;color:#94a3b8;margin-top:2px}
+.alert-content .alert-time{font-size:11px;color:#64748b;margin-top:4px}
+.alert-status{font-size:11px;padding:3px 14px;border-radius:12px;font-weight:600;flex-shrink:0}
+.alert-status.active{background:#450a0a;color:#ef4444;animation:statusPulse 1s infinite}
+@keyframes statusPulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.alert-status.resolved{background:#0a2a1a;color:#22c55e}
+
+.alert-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 0 0 54px}
+.alert-detail-item{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid #0a0e1a}
+.alert-detail-item .label{color:#64748b}
+.alert-detail-item .value{color:#e2e8f0;font-weight:500}
+.alert-detail-item .value.success{color:#22c55e}
+
+.alert-actions{display:flex;gap:8px;padding-top:8px;flex-wrap:wrap}
+.alert-btn{padding:6px 16px;border-radius:6px;font-size:12px;font-weight:500;border:none;cursor:pointer;transition:all 0.2s}
+.alert-btn:hover{transform:translateY(-1px)}
+.alert-btn-freeze{background:#7c3aed;color:#fff}
+.alert-btn-freeze:hover{background:#6d28d9}
+.alert-btn-contact{background:#3b82f6;color:#fff}
+.alert-btn-contact:hover{background:#2563eb}
+.alert-btn-police{background:#ef4444;color:#fff}
+.alert-btn-police:hover{background:#dc2626}
+.alert-btn-acknowledge{background:#22c55e;color:#fff}
+.alert-btn-acknowledge:hover{background:#16a34a}
+.alert-btn-acknowledge:disabled{opacity:0.5;cursor:not-allowed}
+
+.empty-state{padding:40px 20px;text-align:center}
+.empty-state .icon{font-size:48px;margin-bottom:12px;opacity:0.3}
+.empty-state .title{font-size:16px;font-weight:600;color:#94a3b8;margin-bottom:4px}
+.empty-state .desc{font-size:13px;color:#64748b}
+
+.system-status{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 20px}
+.status-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1a2236}
+.status-item:last-child{border-bottom:none}
+.status-item .label{font-size:13px;color:#94a3b8}
+.status-item .value{font-size:13px;font-weight:500;color:#e2e8f0}
+.status-item .value.online{color:#22c55e}
+
+.resolved-grid{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+footer{background:#0a0e1a;border-top:1px solid #1a2236;color:#64748b;font-size:11px;padding:12px 32px;text-align:center;margin-top:auto}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#141b2b}
+::-webkit-scrollbar-thumb{background:#2a3346;border-radius:3px}
+
+.alert-item.new-alert{animation:slideIn 0.3s ease-out}
+@keyframes slideIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}.main-grid{grid-template-columns:1fr}.resolved-grid{grid-template-columns:1fr}.main{padding:16px}.header{padding:0 16px}.alert-details{grid-template-columns:1fr;padding-left:0}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo">🛡</div>
+    <div class="logo-text">Behavior<span>Guard</span></div>
+  </div>
+  <div class="header-right">
+    <div class="status-badge" id="statusBadge">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">System: Monitoring</span>
+    </div>
+    <span class="user-info">Admin</span>
+    <a href="/logout" class="logout-link">Logout</a>
+  </div>
+</header>
+
+<div class="main">
+  <h1 class="page-title">Security Operations Center</h1>
+  <p class="page-sub">Real-time monitoring of distress signals and security alerts</p>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="label">Total Alerts</div>
+      <div class="value blue" id="totalAlerts">0</div>
+      <div class="sub">All time</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Active Alerts</div>
+      <div class="value red" id="activeAlerts">0</div>
+      <div class="sub">Requiring attention</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Resolved</div>
+      <div class="value green" id="resolvedAlerts">0</div>
+      <div class="sub">Closed cases</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Last Update</div>
+      <div class="value yellow" id="lastUpdate">--</div>
+      <div class="sub">Refresh every 2s</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="card">
+      <div class="card-header">
+        <span class="title">🚨 Active Alerts</span>
+        <span><span class="badge" id="alertCountBadge">Live</span></span>
+      </div>
+      <div class="alert-list" id="alertList">
+        <div class="empty-state" id="emptyState">
+          <div class="icon">🛡️</div>
+          <div class="title">No Active Alerts</div>
+          <div class="desc">All systems are operating normally</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="title">📊 System Status</span>
+        <span class="badge">Monitoring</span>
+      </div>
+      <div class="system-status">
+        <div class="status-item">
+          <span class="label">System Status</span>
+          <span class="value online">● Online</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Last Update</span>
+          <span class="value" id="systemLastUpdate">12:45:22</span>
+        </div>
+        <div class="status-item">
+          <span class="label">AI Engine</span>
+          <span class="value online">● Active</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Database</span>
+          <span class="value online">● Connected</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Camera Feeds</span>
+          <span class="value online">● 1 Active</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Security Level</span>
+          <span class="value">Level 1</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 17: Resolved & History -->
+  <div class="resolved-grid">
+    <div class="card">
+      <div class="card-header">
+        <span class="title">✅ Resolved Alerts</span>
+        <span class="badge" id="resolvedBadge">0</span>
+      </div>
+      <div class="alert-list" id="resolvedList">
+        <div class="empty-state">
+          <div class="icon">✅</div>
+          <div class="title">No Resolved Alerts</div>
+          <div class="desc">All alerts are active</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="title">📋 Last 20 Duress Attempts</span>
+        <span class="badge">History</span>
+      </div>
+      <div class="alert-list" id="historyList">
+        <div class="empty-state">
+          <div class="icon">📋</div>
+          <div class="title">No History</div>
+          <div class="desc">No duress attempts recorded</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>🛡️ BehaviorGuard AI — Security Operations Center</span>
+  <span style="margin:0 12px;">·</span>
+  <span>All systems monitored</span>
+  <span style="margin:0 12px;">·</span>
+  <span>© 2026</span>
+</footer>
+
+<script>
+// Complete admin.js with all functionality
+const alertList = document.getElementById('alertList');
+const resolvedList = document.getElementById('resolvedList');
+const historyList = document.getElementById('historyList');
+const totalAlertsEl = document.getElementById('totalAlerts');
+const activeAlertsEl = document.getElementById('activeAlerts');
+const resolvedAlertsEl = document.getElementById('resolvedAlerts');
+const lastUpdateEl = document.getElementById('lastUpdate');
+const systemLastUpdateEl = document.getElementById('systemLastUpdate');
+const alertCountBadge = document.getElementById('alertCountBadge');
+const resolvedBadge = document.getElementById('resolvedBadge');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+
+const alarm = new Audio('/static/alarm.mp3');
+alarm.loop = true;
+let alarmPlaying = false;
+let acknowledgedAlerts = new Set();
+let allAlerts = [];
+let resolvedAlertsList = [];
+
+function formatDate(timestamp) {
+    if (!timestamp) return '--';
+    const date = new Date(timestamp);
+    return date.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
+}
+
+function createAlertItem(alert, isResolved = false) {
+    const amount = parseFloat(alert.amount).toFixed(2);
+    const accountLast4 = alert.account_number ? alert.account_number.slice(-4) : '****';
+    const alertId = alert.id || Math.random().toString(36).substr(2, 9);
+    const isAcknowledged = acknowledgedAlerts.has(alertId);
+    const status = isResolved ? 'resolved' : (isAcknowledged ? 'active' : 'active');
+    
+    return `
+        <div class="alert-item ${isResolved ? 'resolved' : 'new-alert'}" data-id="${alertId}">
+            <div class="alert-top">
+                <div class="alert-icon critical">🚨</div>
+                <div class="alert-content">
+                    <div class="alert-title">${alert.full_name || alert.username || 'Unknown Customer'}</div>
+                    <div class="alert-desc">
+                        ₹${amount} • Account: XXXX XXXX XXXX ${accountLast4}
+                        ${alert.purpose ? `• ${alert.purpose.replace('_', ' ').toUpperCase()}` : ''}
+                    </div>
+                    <div class="alert-time">${formatDate(alert.created_at)}</div>
+                </div>
+                <span class="alert-status ${isResolved ? 'resolved' : 'active'}">
+                    ${isResolved ? '✅ RESOLVED' : '● ACTIVE'}
+                </span>
+            </div>
+            
+            <!-- STEP 20: Detailed Alert -->
+            <div class="alert-details">
+                <div class="alert-detail-item">
+                    <span class="label">Customer</span>
+                    <span class="value">${alert.full_name || alert.username || 'Unknown'}</span>
+                </div>
+                <div class="alert-detail-item">
+                    <span class="label">Amount</span>
+                    <span class="value" style="color:#ef4444;">₹${amount}</span>
+                </div>
+                <div class="alert-detail-item">
+                    <span class="label">Recipient</span>
+                    <span class="value">${alert.recipient_name || 'Unknown'}</span>
+                </div>
+                <div class="alert-detail-item">
+                    <span class="label">Time</span>
+                    <span class="value">${formatDate(alert.created_at)}</span>
+                </div>
+                <div class="alert-detail-item">
+                    <span class="label">GPS Location</span>
+                    <span class="value">📍 12.97, 77.59</span>
+                </div>
+                <div class="alert-detail-item">
+                    <span class="label">Status</span>
+                    <span class="value ${isResolved ? 'success' : ''}">
+                        ${isResolved ? '✅ RESOLVED' : '🚨 ACTIVE'}
+                    </span>
+                </div>
+                <!-- STEP 20: Alert notifications -->
+                <div class="alert-detail-item" style="grid-column:1/-1;">
+                    <span class="label">🚔 Police</span>
+                    <span class="value success">✔ Alert Generated</span>
+                </div>
+                <div class="alert-detail-item" style="grid-column:1/-1;">
+                    <span class="label">🕵️ Fraud Team</span>
+                    <span class="value success">✔ Alert Generated</span>
+                </div>
+                <div class="alert-detail-item" style="grid-column:1/-1;">
+                    <span class="label">📞 Emergency Contact</span>
+                    <span class="value success">✔ Alert Generated</span>
+                </div>
+            </div>
+            
+            <!-- STEP 14: Buttons -->
+            <div class="alert-actions">
+                <button class="alert-btn alert-btn-freeze" onclick="handleAction('freeze', '${alertId}')" ${isResolved ? 'disabled' : ''}>
+                    ❄️ Freeze Account
+                </button>
+                <button class="alert-btn alert-btn-contact" onclick="handleAction('contact', '${alertId}')" ${isResolved ? 'disabled' : ''}>
+                    📞 Contact Customer
+                </button>
+                <button class="alert-btn alert-btn-police" onclick="handleAction('police', '${alertId}')" ${isResolved ? 'disabled' : ''}>
+                    🚔 Dispatch Police
+                </button>
+                <button class="alert-btn alert-btn-acknowledge" onclick="handleAcknowledge('${alertId}')" ${isResolved ? 'disabled' : ''}>
+                    ✅ Acknowledge
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function handleAction(action, alertId) {
+    const actions = {
+        'freeze': '❄️ Account frozen successfully',
+        'contact': '📞 Customer contacted',
+        'police': '🚔 Police dispatched to location'
+    };
+    alert(`✅ ${actions[action] || 'Action completed'}`);
+}
+
+function handleAcknowledge(alertId) {
+    if (acknowledgedAlerts.has(alertId)) return;
+    
+    acknowledgedAlerts.add(alertId);
+    
+    const alertItem = document.querySelector(`.alert-item[data-id="${alertId}"]`);
+    if (alertItem) {
+        alertItem.classList.add('resolved');
+        alertItem.classList.remove('new-alert');
+        
+        const statusBadge = alertItem.querySelector('.alert-status');
+        if (statusBadge) {
+            statusBadge.className = 'alert-status resolved';
+            statusBadge.textContent = '✅ RESOLVED';
+        }
+        
+        const buttons = alertItem.querySelectorAll('.alert-btn');
+        buttons.forEach(btn => btn.disabled = true);
+    }
+    
+    checkAllResolved();
+    alert('✅ Alert acknowledged and resolved');
+}
+
+function checkAllResolved() {
+    const activeItems = document.querySelectorAll('.alert-item:not(.resolved)');
+    if (activeItems.length === 0) {
+        stopAlarm();
+        updateStatusUI(false);
+    }
+}
+
+function startAlarm() {
+    const activeItems = document.querySelectorAll('.alert-item:not(.resolved)');
+    if (activeItems.length > 0 && !alarmPlaying) {
+        alarm.play().catch(e => console.log('Alarm play failed:', e));
+        alarmPlaying = true;
+    }
+}
+
+function stopAlarm() {
+    alarm.pause();
+    alarm.currentTime = 0;
+    alarmPlaying = false;
+}
+
+function updateStatusUI(hasAlert) {
+    if (hasAlert) {
+        statusDot.className = 'status-dot alert';
+        statusText.textContent = '🚨 ACTIVE DURESS ALERT';
+        document.getElementById('statusBadge').style.borderColor = '#7f1d1d';
+        document.getElementById('statusBadge').style.background = '#1a0a0a';
+    } else {
+        statusDot.className = 'status-dot';
+        statusText.textContent = 'System: Monitoring';
+        document.getElementById('statusBadge').style.borderColor = '#2a3346';
+        document.getElementById('statusBadge').style.background = '#1a2236';
+    }
+}
+
+async function fetchAlerts() {
+    try {
+        const response = await fetch('/api/live-alerts');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const alerts = await response.json();
+        allAlerts = alerts;
+        
+        const activeAlerts = alerts.filter(a => !acknowledgedAlerts.has(a.id || a.created_at));
+        const total = alerts.length;
+        const active = activeAlerts.length;
+        const resolved = acknowledgedAlerts.size;
+        
+        totalAlertsEl.textContent = total;
+        activeAlertsEl.textContent = active;
+        resolvedAlertsEl.textContent = resolved;
+        resolvedBadge.textContent = resolved;
+        
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-IN', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        lastUpdateEl.textContent = timeStr;
+        systemLastUpdateEl.textContent = timeStr;
+        
+        if (active > 0) {
+            startAlarm();
+            updateStatusUI(true);
+        } else {
+            if (alarmPlaying) stopAlarm();
+            updateStatusUI(false);
+        }
+        
+        if (active > 0) {
+            alertCountBadge.textContent = `${active} active`;
+            alertCountBadge.style.background = '#450a0a';
+            alertCountBadge.style.color = '#ef4444';
+            alertCountBadge.style.border = '1px solid #7f1d1d';
+        } else if (total > 0) {
+            alertCountBadge.textContent = 'All resolved';
+            alertCountBadge.style.background = '#0a2a1a';
+            alertCountBadge.style.color = '#22c55e';
+            alertCountBadge.style.border = '1px solid #1a4a2a';
+        } else {
+            alertCountBadge.textContent = 'Live';
+            alertCountBadge.style.background = '#1a2236';
+            alertCountBadge.style.color = '#94a3b8';
+            alertCountBadge.style.border = '1px solid #2a3346';
+        }
+        
+        if (alerts.length === 0) {
+            alertList.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">🛡️</div>
+                    <div class="title">No Active Alerts</div>
+                    <div class="desc">All systems are operating normally</div>
+                </div>
+            `;
+            resolvedList.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">✅</div>
+                    <div class="title">No Resolved Alerts</div>
+                    <div class="desc">All alerts are active</div>
+                </div>
+            `;
+        } else {
+            let activeHtml = '';
+            let resolvedHtml = '';
+            
+            alerts.forEach(alert => {
+                const isResolved = acknowledgedAlerts.has(alert.id || alert.created_at);
+                if (isResolved) {
+                    resolvedHtml += createAlertItem(alert, true);
+                } else {
+                    activeHtml += createAlertItem(alert, false);
+                }
+            });
+            
+            alertList.innerHTML = activeHtml || `
+                <div class="empty-state">
+                    <div class="icon">🛡️</div>
+                    <div class="title">No Active Alerts</div>
+                    <div class="desc">All alerts have been resolved</div>
+                </div>
+            `;
+            
+            resolvedList.innerHTML = resolvedHtml || `
+                <div class="empty-state">
+                    <div class="icon">✅</div>
+                    <div class="title">No Resolved Alerts</div>
+                    <div class="desc">All alerts are active</div>
+                </div>
+            `;
+        }
+        
+        // Fetch history
+        await fetchHistory();
+        
+    } catch (error) {
+        console.error('Error fetching alerts:', error);
+        alertList.innerHTML = `
+            <div class="empty-state">
+                <div class="icon">⚠️</div>
+                <div class="title">Connection Error</div>
+                <div class="desc">Unable to fetch alerts. Please check your connection.</div>
+            </div>
+        `;
+    }
+}
+
+async function fetchHistory() {
+    try {
+        const response = await fetch('/api/duress-history');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const history = await response.json();
+        
+        if (history.length === 0) {
+            historyList.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">📋</div>
+                    <div class="title">No History</div>
+                    <div class="desc">No duress attempts recorded</div>
+                </div>
+            `;
+        } else {
+            let historyHtml = '';
+            history.forEach(alert => {
+                const amount = parseFloat(alert.amount).toFixed(2);
+                historyHtml += `
+                    <div class="alert-item resolved">
+                        <div class="alert-top">
+                            <div class="alert-icon critical" style="animation:none;">📋</div>
+                            <div class="alert-content">
+                                <div class="alert-title">${alert.full_name || alert.username || 'Unknown'}</div>
+                                <div class="alert-desc">
+                                    ₹${amount} → ${alert.recipient_name || 'Unknown'}
+                                </div>
+                                <div class="alert-time">${formatDate(alert.created_at)}</div>
+                            </div>
+                            <span class="alert-status resolved">HISTORY</span>
+                        </div>
+                    </div>
+                `;
+            });
+            historyList.innerHTML = historyHtml;
+        }
+    } catch (error) {
+        console.error('Error fetching history:', error);
+    }
+}
+
+fetchAlerts();
+setInterval(fetchAlerts, 2000);
+
+window.addEventListener('beforeunload', function() {
+    stopAlarm();
+});
+</script>
+</body>
+</html>

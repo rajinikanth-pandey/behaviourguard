@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>SecureBank - Verify Transfer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "background": "#f8f9ff",
+                    "surface": "#ffffff",
+                    "primary": "#0D2137",
+                    "primary-light": "#1A6BFF",
+                    "on-primary": "#ffffff",
+                    "on-background": "#0b1c30",
+                    "surface-variant": "#d3e4fe",
+                    "outline-variant": "#c4c6ce",
+                }
+            }
+        }
+    }
+</script>
+<style>
+    #video-feed {
+        transform: scaleX(-1);
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background: #000;
+    }
+    .progress-bar-fill {
+        transition: width 0.3s ease;
+    }
+    .camera-container {
+        background: #000;
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+    .camera-container video,
+    .camera-container img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .camera-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.2));
+        pointer-events: none;
+    }
+    .scan-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent);
+        animation: scan 4s ease-in-out infinite;
+        pointer-events: none;
+    }
+    @keyframes scan {
+        0% { top: 0; }
+        50% { top: 100%; }
+        100% { top: 0; }
+    }
+    .corner-marker {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-color: rgba(255,255,255,0.15);
+        border-style: solid;
+        border-width: 0;
+        pointer-events: none;
+    }
+    .corner-marker.tl { top: 12px; left: 12px; border-top-width: 2px; border-left-width: 2px; }
+    .corner-marker.tr { top: 12px; right: 12px; border-top-width: 2px; border-right-width: 2px; }
+    .corner-marker.bl { bottom: 12px; left: 12px; border-bottom-width: 2px; border-left-width: 2px; }
+    .corner-marker.br { bottom: 12px; right: 12px; border-bottom-width: 2px; border-right-width: 2px; }
+    
+    .transaction-detail {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .transaction-detail:last-child {
+        border-bottom: none;
+    }
+    .transaction-label {
+        color: #6b7280;
+        font-size: 13px;
+    }
+    .transaction-value {
+        font-weight: 600;
+        color: #0D2137;
+        font-size: 14px;
+    }
+    .transaction-value.amount {
+        color: #007A52;
+        font-size: 18px;
+    }
+    .verification-notice {
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-top: 12px;
+    }
+    .verification-notice.face {
+        background: #EFF6FF;
+        border: 1px solid #BFDBFE;
+    }
+    .verification-notice.pin {
+        background: #ECFDF5;
+        border: 1px solid #A7F3D0;
+    }
+    .verification-notice .icon {
+        font-size: 18px;
+    }
+    .verification-type {
+        display: inline-block;
+        padding: 2px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .verification-type.face {
+        background: #EFF6FF;
+        color: #1A6BFF;
+    }
+    .verification-type.pin {
+        background: #ECFDF5;
+        color: #007A52;
+    }
+    .gesture-indicator {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .gesture-detected {
+        background: #ECFDF5;
+        color: #007A52;
+    }
+    .gesture-none {
+        background: #ECFDF5;
+        color: #007A52;
+    }
+    .btn-primary {
+        background: #1A6BFF;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #1156AE;
+    }
+    .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .btn-success {
+        background: #007A52;
+        color: white;
+    }
+    .btn-success:hover {
+        background: #005f3f;
+    }
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #5A6A7E;
+    }
+    .step-indicator .step {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+    .step-indicator .step.active {
+        background: #1A6BFF;
+        color: #fff;
+    }
+    .step-indicator .step.done {
+        background: #ECFDF5;
+        color: #007A52;
+    }
+    .step-indicator .step.pending {
+        background: #F4F6FB;
+        color: #94A3B8;
+    }
+    .status-text {
+        font-size: 13px;
+        font-weight: 500;
+    }
+    .status-text.ready {
+        color: #007A52;
+    }
+    .status-text.processing {
+        color: #1A6BFF;
+    }
+    .status-text.complete {
+        color: #007A52;
+    }
+</style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+
+<!-- Top Bar -->
+<header class="w-full border-b border-gray-100 bg-surface flex justify-between items-center px-6 h-16 max-w-7xl mx-auto">
+    <div class="font-bold text-lg text-on-surface flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary-light">shield_lock</span>
+        SecureBank
+    </div>
+    <div class="text-sm text-gray-400">Secure Verification</div>
+</header>
+
+<!-- Main Content -->
+<main class="flex-1 flex flex-col items-center px-4 py-6 max-w-4xl mx-auto w-full">
+
+    <!-- Transaction Details Card -->
+    <div class="w-full max-w-2xl bg-surface rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <h2 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary-light">receipt_long</span>
+            Transaction Details
+            {% if verification_method == 'face_transaction' %}
+                <span class="verification-type face">👤 Face Transaction</span>
+            {% else %}
+                <span class="verification-type pin">🔑 PIN Transaction</span>
+            {% endif %}
+        </h2>
+        
+        {% if session.transaction %}
+        <div class="transaction-detail">
+            <span class="transaction-label">Recipient</span>
+            <span class="transaction-value">{{ session.transaction.recipient }}</span>
+        </div>
+        <div class="transaction-detail">
+            <span class="transaction-label">Account Number</span>
+            <span class="transaction-value">XXXX XXXX {{ session.transaction.account[-4:] }}</span>
+        </div>
+        <div class="transaction-detail">
+            <span class="transaction-label">IFSC Code</span>
+            <span class="transaction-value">{{ session.transaction.ifsc }}</span>
+        </div>
+        <div class="transaction-detail">
+            <span class="transaction-label">Amount</span>
+            <span class="transaction-value amount">₹ {{ "%.2f"|format(session.transaction.amount) }}</span>
+        </div>
+        <div class="transaction-detail">
+            <span class="transaction-label">Purpose</span>
+            <span class="transaction-value">{{ session.transaction.purpose|replace('_', ' ')|title }}</span>
+        </div>
+        {% else %}
+        <div class="transaction-detail">
+            <span class="transaction-label" style="color:#C0392B;">⚠️ No transaction details found</span>
+            <span class="transaction-value"><a href="/home" style="color:#1A6BFF;">Go back</a></span>
+        </div>
+        {% endif %}
+        
+        <!-- Verification Notice -->
+        {% if verification_method == 'face_transaction' %}
+            <div class="verification-notice face">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="icon">👤</span>
+                    <span style="font-weight:600;color:#1A6BFF;">Face Transaction Mode</span>
+                </div>
+                <div style="font-size:13px;color:#0D2137;margin-top:4px;">
+                    <strong>Step 1:</strong> Enter PIN (already done)<br>
+                    <strong>Step 2:</strong> Look into camera for verification
+                </div>
+                <div class="step-indicator">
+                    <span class="step done">✅ PIN Verified</span>
+                    <span style="color:#94A3B8;">→</span>
+                    <span class="step active">🔄 Face Verification</span>
+                </div>
+            </div>
+        {% else %}
+            <div class="verification-notice pin">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="icon">🔑</span>
+                    <span style="font-weight:600;color:#007A52;">PIN Transaction Mode</span>
+                </div>
+                <div style="font-size:13px;color:#065f46;margin-top:4px;">
+                    Transaction will be processed with PIN verification only.
+                </div>
+                <div class="step-indicator">
+                    <span class="step done">✅ PIN Verified</span>
+                    <span style="color:#94A3B8;">→</span>
+                    <span class="step done">✅ Processing</span>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Camera Viewport - Only for Face Transaction -->
+    {% if verification_method == 'face_transaction' %}
+    <div class="w-full max-w-2xl mx-auto mb-4">
+        <div class="relative aspect-video camera-container border border-gray-200 shadow-lg" id="camera-container">
+            <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Camera Feed">
+            <div class="camera-overlay"></div>
+            <div class="scan-line"></div>
+            <div class="corner-marker tl"></div>
+            <div class="corner-marker tr"></div>
+            <div class="corner-marker bl"></div>
+            <div class="corner-marker br"></div>
+            <div id="duress-overlay" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="w-full max-w-2xl mx-auto flex flex-col gap-2">
+        <div class="w-full bg-gray-100 rounded-full h-1 overflow-hidden">
+            <div class="bg-gray-600 h-1 rounded-full progress-bar-fill w-0" id="scan-progress"></div>
+        </div>
+        <div class="flex justify-between text-xs text-gray-400 px-1">
+            <span>Face Verification</span>
+            <span id="progress-percentage">0%</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons - Always shows positive messages -->
+    <div class="w-full max-w-md mx-auto mt-6 flex gap-4">
+        <button id="verify-btn" class="flex-1 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 btn-primary">
+            {% if verification_method == 'face_transaction' %}
+                Complete Transaction →
+            {% else %}
+                Complete Transaction →
+            {% endif %}
+        </button>
+        <button id="cancel-btn" class="flex-1 bg-white border border-gray-200 text-gray-600 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm">
+            Cancel
+        </button>
+    </div>
+
+    <!-- Status - Always shows positive messages -->
+    <div class="mt-4 flex items-center gap-4">
+        <div class="flex items-center gap-2">
+            <span class="relative flex h-2 w-2">
+                <span id="status-dot" class="absolute inline-flex h-full w-full rounded-full bg-green-500"></span>
+            </span>
+            <span class="text-xs text-gray-400 status-text ready" id="status-text">Ready to complete</span>
+        </div>
+        {% if verification_method == 'face_transaction' %}
+        <div id="gesture-status" class="text-xs">
+            <span class="gesture-indicator gesture-none">● Face verification active</span>
+        </div>
+        {% endif %}
+    </div>
+
+</main>
+
+<script>
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    const gestureStatus = document.getElementById('gesture-status');
+    const progressBar = document.getElementById('scan-progress');
+    const progressText = document.getElementById('progress-percentage');
+    const verifyBtn = document.getElementById('verify-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+
+    const isFaceMode = {{ 'true' if verification_method == 'face_transaction' else 'false' }};
+    let progress = 0;
+    let isDuress = false;
+    let hasGesture = false;
+    let isProcessing = false;
+
+    async function fetchStatus() {
+        if (!isFaceMode) {
+            statusText.textContent = '✅ Ready to complete';
+            statusText.className = 'text-xs status-text ready';
+            statusDot.className = 'absolute inline-flex h-full w-full rounded-full bg-green-500';
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/status');
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            
+            isDuress = data.duress;
+            hasGesture = data.has_gesture || false;
+            
+            if (hasGesture) {
+                gestureStatus.innerHTML = `<span class="gesture-indicator gesture-detected">● Face verified</span>`;
+            } else {
+                gestureStatus.innerHTML = `<span class="gesture-indicator gesture-none">● Face verification active</span>`;
+            }
+            
+            // Always show positive status
+            statusText.textContent = '✅ Ready to complete';
+            statusText.className = 'text-xs status-text ready';
+            statusDot.className = 'absolute inline-flex h-full w-full rounded-full bg-green-500';
+            
+            // Enable button always
+            verifyBtn.disabled = false;
+            verifyBtn.className = 'flex-1 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 btn-primary';
+            verifyBtn.textContent = 'Complete Transaction →';
+            
+            if (progress < 100) {
+                progress += Math.random() * 2 + 1;
+                if (progress > 100) progress = 100;
+                if (progressBar) {
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `${Math.floor(progress)}%`;
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error fetching status:', error);
+            statusText.textContent = '✅ Ready to complete';
+            statusText.className = 'text-xs status-text ready';
+            statusDot.className = 'absolute inline-flex h-full w-full rounded-full bg-yellow-500';
+        }
+    }
+
+    verifyBtn.addEventListener('click', async () => {
+        if (isProcessing) return;
+        
+        isProcessing = true;
+        verifyBtn.disabled = true;
+        verifyBtn.textContent = 'Processing...';
+        verifyBtn.className = 'flex-1 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 bg-gray-400 text-white cursor-not-allowed';
+        statusText.textContent = '⏳ Processing...';
+        statusText.className = 'text-xs status-text processing';
+        
+        try {
+            const response = await fetch('/api/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: 'verify' })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Verification failed');
+            }
+            
+            const data = await response.json();
+            
+            // Always show success to user
+            statusText.textContent = '✅ Transaction Complete!';
+            statusText.className = 'text-xs status-text complete';
+            statusDot.className = 'absolute inline-flex h-full w-full rounded-full bg-green-500';
+            verifyBtn.textContent = '✅ Complete';
+            verifyBtn.className = 'flex-1 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 btn-success cursor-not-allowed';
+            
+            if (progressBar) {
+                progress = 100;
+                progressBar.style.width = '100%';
+                progressText.textContent = '100%';
+            }
+            
+            setTimeout(() => {
+                window.location.href = '/success';
+            }, 1500);
+            
+        } catch (error) {
+            console.error('Error during verification:', error);
+            statusText.textContent = '⚠️ Please try again';
+            statusText.className = 'text-xs status-text';
+            statusDot.className = 'absolute inline-flex h-full w-full rounded-full bg-yellow-500';
+            alert('An error occurred. Please try again.');
+        } finally {
+            isProcessing = false;
+            if (!isDuress) {
+                verifyBtn.disabled = false;
+                verifyBtn.className = 'flex-1 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 btn-primary';
+                verifyBtn.textContent = 'Complete Transaction →';
+            }
+        }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        if (confirm('Cancel this transaction?')) {
+            window.location.href = '/home';
+        }
+    });
+
+    if (isFaceMode) {
+        setInterval(fetchStatus, 300);
+    }
+    fetchStatus();
+
+    if (document.getElementById('video-feed')) {
+        document.getElementById('video-feed').addEventListener('error', () => {
+            statusText.textContent = '📷 Camera unavailable';
+        });
+    }
+</script>
+
+</body>
+</html>
