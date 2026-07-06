@@ -1,14 +1,15 @@
+import os
 import hashlib
 import mysql.connector
 from datetime import datetime, date
 import random
 
-# ── Edit these to match your MySQL setup ─────────────────────────────────────
 DB_CONFIG = {
-    "host": "localhost",
-    "user": "root",
-    "password": "password",
-    "database": "behaviorguard1"
+    "host": os.getenv("DB_HOST", "localhost"),
+    "user": os.getenv("DB_USER", "root"),
+    "password": os.getenv("DB_PASSWORD", "password"),
+    "database": os.getenv("DB_NAME", "behaviorguard1"),
+    "port": int(os.getenv("DB_PORT", "3306"))
 }
 
 
