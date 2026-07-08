@@ -912,4 +912,226 @@
         <section>
             <h2>🚀 Installation &amp; Setup</h2>
 
-           
+            <h3>Prerequisites</h3>
+            <ul>
+                <li>Python 3.8 or higher</li>
+                <li>MySQL 8.0 or higher</li>
+                <li>Webcam (for face detection)</li>
+                <li>Git</li>
+            </ul>
+
+            <h3>Step 1 – Clone the Repository</h3>
+            <pre><code>git clone https://github.com/yourusername/behaviorguard-ai.git
+cd behaviorguard-ai</code></pre>
+
+            <h3>Step 2 – Create Virtual Environment</h3>
+            <pre><code># Using conda
+conda create -n behaviorguard python=3.9
+conda activate behaviorguard
+
+# OR using venv
+python -m venv behaviorguard_env
+source behaviorguard_env/bin/activate  # Windows: behaviorguard_env\Scripts\activate</code></pre>
+
+            <h3>Step 3 – Install Dependencies</h3>
+            <pre><code>pip install -r requirements.txt</code></pre>
+
+            <h3>Step 4 – Setup Database</h3>
+            <pre><code>mysql -u root -p &lt; schema.sql</code></pre>
+
+            <h3>Step 5 – Configure Database</h3>
+            <p>Edit <code>database.py</code> and update your MySQL credentials:</p>
+            <pre><code>DB_CONFIG = {
+    "host": "localhost",
+    "user": "root",
+    "password": "your_password",
+    "database": "behaviorguard1"
+}</code></pre>
+
+            <h3>Step 6 – Download AI Models</h3>
+            <p>Place these files in the project root directory:</p>
+            <ul>
+                <li><code>face_landmarker.task</code> – MediaPipe face detection model</li>
+                <li><code>eye_state_xgb.pkl</code> – XGBoost eye state classifier</li>
+                <li><code>scaler.pkl</code> – Pre-fitted StandardScaler</li>
+                <li><code>isolation_forest.pkl</code> – Pre-fitted Isolation Forest</li>
+                <li><code>autoencoder.h5</code> – Pre-fitted Autoencoder</li>
+            </ul>
+
+            <h3>Step 7 – Run the Application</h3>
+            <pre><code># Start the risk engine first
+uvicorn risk_engine:app --host 0.0.0.0 --port 8000 --reload
+
+# In a new terminal, start the Flask app
+python app.py</code></pre>
+
+            <h3>Step 8 – Access the Application</h3>
+            <ul>
+                <li><strong>User Portal:</strong> <code>http://localhost:5000</code></li>
+                <li><strong>Admin Panel:</strong> <code>http://localhost:5000/admin</code> (password: <code>admin@123</code>)</li>
+                <li><strong>Dashboard:</strong> <code>http://localhost:5000/dashboard</code></li>
+                <li><strong>Risk Engine API:</strong> <code>http://localhost:8000</code></li>
+            </ul>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- API ENDPOINTS -->
+        <!-- ============================================================ -->
+        <section>
+            <h2>📡 API Endpoints</h2>
+
+            <h3>Web Application (Flask — Port 5000)</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>/</code></td><td>GET</td><td>Login page</td></tr>
+                        <tr><td><code>/login</code></td><td>POST</td><td>Process login with behavioral events</td></tr>
+                        <tr><td><code>/home</code></td><td>GET</td><td>User dashboard</td></tr>
+                        <tr><td><code>/transfer</code></td><td>GET/POST</td><td>Money transfer form</td></tr>
+                        <tr><td><code>/verify</code></td><td>GET</td><td>Transaction verification page</td></tr>
+                        <tr><td><code>/video_feed</code></td><td>GET</td><td>Webcam video stream</td></tr>
+                        <tr><td><code>/admin</code></td><td>GET/POST</td><td>Admin panel (password protected)</td></tr>
+                        <tr><td><code>/dashboard</code></td><td>GET</td><td>Analytics dashboard</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>API Routes (Flask)</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>/api/status</code></td><td>GET</td><td>Get current gesture status</td></tr>
+                        <tr><td><code>/api/verify</code></td><td>POST</td><td>Process transaction verification</td></tr>
+                        <tr><td><code>/api/reset</code></td><td>GET</td><td>Reset duress state</td></tr>
+                        <tr><td><code>/api/live-alerts</code></td><td>GET</td><td>Get active duress alerts</td></tr>
+                        <tr><td><code>/api/duress-history</code></td><td>GET</td><td>Get duress attempt history</td></tr>
+                        <tr><td><code>/api/dashboard-stats</code></td><td>GET</td><td>Get dashboard statistics</td></tr>
+                        <tr><td><code>/api/live-stats</code></td><td>GET</td><td>Get live session statistics</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Risk Engine API (FastAPI — Port 8000)</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>/api/score-session</code></td><td>POST</td><td>Score behavioral events → risk score</td></tr>
+                        <tr><td><code>/health</code></td><td>GET</td><td>Health check for the risk engine</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- FUTURE SCOPE -->
+        <!-- ============================================================ -->
+        <section>
+            <h2>🔭 Future Scope</h2>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <span class="icon">📊</span>
+                    <strong>Production-Scale Data</strong>
+                    <span>Validate thresholds against larger real-world datasets across multiple banks</span>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">⚡</span>
+                    <strong>Kafka Streaming</strong>
+                    <span>Replace batched event collection with real-time streaming for lower latency</span>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">💾</span>
+                    <strong>Redis Caching</strong>
+                    <span>Cache risk scores for faster retrieval and reduced model inference load</span>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">📱</span>
+                    <strong>Mobile SDK</strong>
+                    <span>Port the event-capture layer to Android/iOS for UPI and mobile banking apps</span>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">🔒</span>
+                    <strong>ONNX Export</strong>
+                    <span>Export models to ONNX for lightweight, cross-platform inference</span>
+                </div>
+                <div class="feature-card">
+                    <span class="icon">🤖</span>
+                    <strong>Federated Learning</strong>
+                    <span>Train models on-device to preserve user privacy while improving accuracy</span>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>🚀 Next Steps</strong>
+                <p style="margin-top:6px;">
+                    The gap to a production pilot is mainly <strong>scale and hardening</strong>:
+                    moving Kafka streaming and Redis caching from the roadmap into the core path,
+                    and validating thresholds against a larger real-world dataset — rather than a
+                    redesign of the approach.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- CONCLUSION -->
+        <!-- ============================================================ -->
+        <section>
+            <h2>📝 Conclusion</h2>
+
+            <p>
+                <strong>BehaviorGuard AI</strong> closes the single-gate authentication blind spot in
+                Indian digital banking by scoring behavior continuously rather than once. Its
+                <strong>stateless FastAPI risk engine</strong> and <strong>two-model ensemble</strong>
+                require no core-banking changes, work from session one with no enrolment period, and
+                keep an immutable audit trail for regulators — while the <strong>silent duress channel</strong>
+                extends protection to physically coerced transactions, a gap no current Indian banking
+                system addresses.
+            </p>
+
+            <div class="info-box success">
+                <strong>🏆 Hackathon Build</strong>
+                <p style="margin-top:6px;">
+                    The project already demonstrates the <strong>full authentication loop</strong> a real
+                    deployment would need — capture, feature engineering, dual-model inference, policy,
+                    and an auditable data store — <strong>wired together and runnable end to end</strong>
+                    rather than mocked. The system includes a <strong>fully implemented silent duress
+                    detection</strong> using facial gesture recognition (wink, blink, etc.), which was
+                    proposed at the hackathon but has now been <strong>fully built and integrated</strong>
+                    into the live demo.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- FOOTER -->
+        <!-- ============================================================ -->
+        <footer class="footer">
+            <p>
+                <strong>BehaviorGuard AI</strong> — Team Trust Shield AI<br>
+                National Forensic Sciences University (NFSU) &bull;
+                Cyber Security PSBs Hackathon Series 2026 &bull;
+                DFS &amp; IBA &bull; MNNIT Allahabad, Prayagraj
+            </p>
+            <p style="margin-top:8px;">
+                <a href="#">📧 Contact</a> &bull;
+                <a href="#">🐙 GitHub</a> &bull;
+                <a href="#">📄 License: MIT</a>
+            </p>
+            <p style="margin-top:12px;font-size:12px;color:#a0aec0;">
+                &copy; 2026 BehaviorGuard AI. All rights reserved.
+            </p>
+        </footer>
+
+    </div>
+
+</body>
+</html>
